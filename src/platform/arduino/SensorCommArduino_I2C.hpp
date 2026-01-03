@@ -42,7 +42,17 @@ public:
     bool init() override
     {
         setPins();
+        // ESP32 (Arduino-ESP32 driver_ng): calling begin() repeatedly on an
+        // already-configured I2C bus produces noisy warnings ("Bus already started").
+        // If SDA/SCL were not provided, assume the caller already initialized
+        // the bus and avoid re-initializing it.
+    #if defined(ARDUINO_ARCH_ESP32)
+        if (sda != -1 && scl != -1) {
+            wire.begin();
+        }
+    #else
         wire.begin();
+    #endif
         return true;
     }
 
